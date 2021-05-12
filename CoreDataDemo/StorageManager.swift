@@ -35,14 +35,15 @@ class StorageManager {
         }
     }
     
-    func fetchData(with complition: @escaping ([Task]) -> Void) {
+    func fetchData() -> [Task] {
         let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
         
         do {
             let taskList = try persistentContainer.viewContext.fetch(fetchRequest)
-            complition(taskList)
+            return taskList
         } catch let error {
             print(error)
+            return []
         }
     }
     
@@ -61,5 +62,17 @@ class StorageManager {
         }
     }
     
+    func deleteTask(at index: Int) {
+        let task = fetchData()[index]
+        persistentContainer.viewContext.delete(task)
+        
+        if persistentContainer.viewContext.hasChanges {
+            do {
+                try persistentContainer.viewContext.save()
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
+    }
     
 }

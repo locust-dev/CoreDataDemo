@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import CoreData
 
 protocol TaskViewControllereDelegate {
     func reloadData()
@@ -22,9 +21,7 @@ class TaskListViewController: UITableViewController {
         view.backgroundColor = .white
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellID)
         setupNavigationBar()
-        StorageManager.shared.fetchData { tasks in
-            self.taskList = tasks
-        }
+        taskList = StorageManager.shared.fetchData()
     }
 
     @objc private func addNewTask() {
@@ -101,12 +98,22 @@ extension TaskListViewController {
     }
 }
 
+// MARK: - UITableViewDelegate
+extension TaskListViewController {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            taskList.remove(at: indexPath.row)
+            StorageManager.shared.deleteTask(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+        }
+    }
+    
+}
+
 // MARK: - TaskViewControllereDelegate
 extension TaskListViewController: TaskViewControllereDelegate {
     func reloadData() {
-        StorageManager.shared.fetchData { tasks in
-            self.taskList = tasks
-        }
+        taskList = StorageManager.shared.fetchData()
         tableView.reloadData()
     }
 }
