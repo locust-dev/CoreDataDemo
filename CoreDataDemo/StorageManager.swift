@@ -47,32 +47,24 @@ class StorageManager {
         }
     }
     
-    func save(_ taskName: String, with complition: @escaping (Task) -> Void) {
+    func saveTask(_ taskName: String, with complition: @escaping (Task) -> Void) {
         guard let entityDescription = NSEntityDescription.entity(forEntityName: "Task", in: persistentContainer.viewContext) else { return }
         guard let task = NSManagedObject(entity: entityDescription, insertInto: persistentContainer.viewContext) as? Task else { return }
         task.title = taskName
         complition(task)
-        
-        if persistentContainer.viewContext.hasChanges {
-            do {
-                try persistentContainer.viewContext.save()
-            } catch let error {
-                print(error.localizedDescription)
-            }
-        }
+        saveContext()
+    }
+    
+    func editTask(_ title: String, index: Int) {
+        fetchData()[index].title = title
+        saveContext()
     }
     
     func deleteTask(at index: Int) {
         let task = fetchData()[index]
         persistentContainer.viewContext.delete(task)
-        
-        if persistentContainer.viewContext.hasChanges {
-            do {
-                try persistentContainer.viewContext.save()
-            } catch let error {
-                print(error.localizedDescription)
-            }
-        }
+        saveContext()
     }
+    
     
 }
